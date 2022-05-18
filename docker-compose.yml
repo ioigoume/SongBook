@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:14.2-bullseye
+    container_name: pg.music.14
+    user: root
+    privileged: true
+    volumes:
+      - ./pg-init-scripts:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=music_development,music_test
+      - POSTGRES_USER=music_user
+      - POSTGRES_PASSWORD=secret
+    ports:
+      - "45432:5432"
+    tty: true # this is used to prevent container from exiting if the entrypoint is /bin/bash
+    stdin_open: true
+  web:
+    depends_on:
+      - db
+    build: .
+    image: musicbox:latest
+    container_name: musicbox.geant
+    environment:
+      - PATH=$PATH:.local/bin
+      - DATABASE_URL=postgresql+psycopg2://music_user:secret@db/music_development
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    ports:
+      - "8004:8000"
+    volumes:
+      - .:/app
+    tty: true
+  pgadmin:
+    depends_on:
+      - db
+    container_name: pg.admin.container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=ioigoume@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "127.0.0.1:5050:80"
+
+volumes:
+  pgdata:
+
+
