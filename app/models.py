@@ -1,33 +1,89 @@
 from typing import List, Optional
-from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
+from sqlmodel import Field, Relationship, Session, SQLModel
 from datetime import datetime
 
-
-class User(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    fist_name: str
+# User
+class UserBase(SQLModel):
+    first_name: str
     last_name: str
     email: str = Field(index=True)
     password: str
-    # Port has_many
+
+
+class User(UserBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
     songs: List["Song"] = Relationship(back_populates="song")
 
-class Song(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    title: str = Field(index=True)
+
+class UserCreate(UserBase):
+    pass
+
+
+class UserRead(UserBase):
+    id: int
+
+class UserUpdate(SQLModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+
+# Songs
+class SongBase(SQLModel):
+    title: str
     artist: str
-    release_date: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    # Foreign Keys
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
-    # Port has_many
-    comments: List["Comment"] = Relationship(back_populates="comment")
+    release_date: str
 
-class Comment(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+
+
+class Song(SongBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    user: Optional[User] = Relationship(back_populates="users")
+
+
+class SongRead(SongBase):
+    id: int
+
+
+class SongCreate(SongBase):
+    pass
+
+
+class SongUpdate(SQLModel):
+    title: Optional[str] = None
+    artist: Optional[str] = None
+    release_date: Optional[datetime] = None
+    user_id: Optional[int] = None
+
+
+# Songs
+class CommentBase(SQLModel):
     comment: str
-    # Foreign key
-    song_id: Optional[int] = Field(default=None, foreign_key="song.id", index=True)
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
+    created: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    song_id: Optional[int] = Field(default=None, foreign_key="song.id")
+
+
+class Comment(CommentBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    user: Optional[User] = Relationship(back_populates="users")
+    song: Optional[Song] = Relationship(back_populates="songs")
+
+
+class CommentRead(CommentBase):
+    id: int
+
+
+class CommentCreate(CommentBase):
+    pass
+
+
+class CommentUpdate(SQLModel):
+    comment: Optional[str] = None
 
 

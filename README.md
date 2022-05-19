@@ -17,5 +17,8 @@ docker-compose run --rm --no-deps web pip install -r requirements.txt
 [//]: # (docker-compose run --rm web alembic revision --autogenerate -m 'Initial Migration')
 docker-compose run --rm web alembic upgrade head
 
+### Seed with test data
+docker-compose run --rm web python app/seed.py
+
 ### Start the Service
 docker-compose up web
