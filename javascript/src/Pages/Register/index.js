@@ -1,6 +1,7 @@
 import {useState} from "react";
 import "../../app.css";
 import FormInput from "../../components/FormInput";
+import {Link} from "react-router-dom";
 
 const Register = () => {
     const [values, setValues] = useState({
@@ -66,7 +67,7 @@ const Register = () => {
     return (
         <div className="app">
             <form onSubmit={handleSubmit}>
-                <h1>Register</h1>
+                <h1 className="reg-log">Register</h1>
                 {inputs.map((input) => (
                     <FormInput
                         key={input.id}
@@ -75,7 +76,10 @@ const Register = () => {
                         onChange={onChange}
                     />
                 ))}
-                <button type={"submit"}>Submit</button>
+                <button className="reg-form" type="submit">Submit</button>
+                <div className="reg-link">
+                    <Link to={'/login'}>Login</Link>
+                </div>
             </form>
         </div>
     );

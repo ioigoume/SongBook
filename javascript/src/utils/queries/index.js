@@ -1,3 +1,5 @@
+import { client as apiClient } from '../api';
+
 // Users
 
 // GET Users

@@ -1,12 +1,27 @@
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 from app.database import get_session
 from app.models import *
 
+
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3004",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/ping")
@@ -72,8 +87,16 @@ def delete_song(*, session: Session = Depends(get_session), song_id: int):
 
 # User
 @app.post("/users/", response_model=SongRead)
-def create_user(*, session: Session = Depends(get_session), song: SongCreate):
-    db_user = User.from_orm(song)
+def create_user(*, session: Session = Depends(get_session), user: UserCreate):
+    db_user = User.from_orm(user)
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
+
+@app.post("/users/login")
+def login_user(*, session: Session = Depends(get_session), user: UserLogin):
+    db_user = User.from_orm(user)
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
