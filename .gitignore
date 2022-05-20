@@ -129,3 +129,15 @@ dmypy.json
 .pyre/
 .idea/*
 .local/*
+
+.cache
+/node_modules
+.npm/**
+javascript/.npm/**
+.gnupg/**
+.idea/**
+.yarn/**
+.yarnrc
+.vscode/
+.DS_Store
+yarn-error.log
