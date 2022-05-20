@@ -94,14 +94,6 @@ def create_user(*, session: Session = Depends(get_session), user: UserCreate):
     session.refresh(db_user)
     return db_user
 
-@app.post("/users/login")
-def login_user(*, session: Session = Depends(get_session), user: UserLogin):
-    db_user = User.from_orm(user)
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-    return db_user
-
 
 @app.get("/users/", response_model=List[UserRead])
 def read_users(
