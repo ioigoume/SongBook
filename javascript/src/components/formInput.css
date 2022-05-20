@@ -5,8 +5,8 @@
 }
 
 input {
-    padding: 15px;
-    margin: 10px 0px;
+    padding: 1em;
+    margin-top: 0.25em;
     border-radius: 5px;
     border: 1px solid gray;
 }
@@ -17,11 +17,11 @@ label {
     color: gray;
 }
 
-span {
+span.error {
     font-size: 12px;
     padding: 3px;
     color: red;
-    display: none;
+    margin-bottom: 1em;
 }
 
 input:invalid[focused="true"] {

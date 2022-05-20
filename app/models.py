@@ -1,5 +1,6 @@
 from typing import List, Optional
 from sqlmodel import Field, Relationship, Session, SQLModel
+from sqlalchemy import UniqueConstraint
 from datetime import datetime
 
 # User
@@ -11,6 +12,7 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
+    __table_args__ = (UniqueConstraint("email"),)
     id: Optional[int] = Field(default=None, primary_key=True)
 
     songs: List["Song"] = Relationship(back_populates="song")

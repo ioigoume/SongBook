@@ -1,5 +1,5 @@
 import "./app.css";
-import {BrowserRouter as Router, Routes, Route, Link} from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Songs from "./Pages/Songs";
@@ -21,8 +21,7 @@ function App() {
                 </Routes>
             </QueryClientProvider>
         </Router>
-    )
-        ;
+    );
 }
 
 export default App;

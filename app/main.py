@@ -82,7 +82,7 @@ def delete_song(*, session: Session = Depends(get_session), song_id: int):
 
 
 # User
-@app.post("/users/", response_model=SongRead)
+@app.post("/users/", response_model=UserCreate)
 def create_user(*, session: Session = Depends(get_session), user: UserCreate):
     db_user = User.from_orm(user)
     session.add(db_user)
@@ -110,7 +110,7 @@ def read_user(*, session: Session = Depends(get_session), user_id: int):
     return user
 
 
-@app.patch("/users/{user_id}", response_model=UserRead)
+@app.patch("/users/{user_id}", response_model=UserUpdate)
 def update_user(
     *, session: Session = Depends(get_session), user_id: int, user: UserUpdate
 ):

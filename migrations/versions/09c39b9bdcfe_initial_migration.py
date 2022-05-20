@@ -1,8 +1,8 @@
 """Initial Migration
 
-Revision ID: 556a3d25c629
+Revision ID: 09c39b9bdcfe
 Revises: 
-Create Date: 2022-05-19 10:57:28.253063
+Create Date: 2022-05-20 16:31:07.086170
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision = '556a3d25c629'
+revision = '09c39b9bdcfe'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,7 +25,8 @@ def upgrade():
     sa.Column('email', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('password', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=False)
     op.create_index(op.f('ix_user_first_name'), 'user', ['first_name'], unique=False)

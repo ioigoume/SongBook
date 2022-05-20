@@ -19,7 +19,7 @@ const Login = () => {
     };
 
     // FORM
-    const {register, handleSubmit, reset, setError, formState: {errors}} = useForm();
+    const {register, handleSubmit, reset, formState: {errors}} = useForm();
 
     async function postForm(data) {
         const {email, password} = data
@@ -30,9 +30,9 @@ const Login = () => {
         })
     }
 
-    const {isLoading, mutateAsync: sendData} = useMutation(postForm);
+    const {mutateAsync: sendData} = useMutation(postForm);
 
-    const notifyError = () => toast.error("Update contact failed.")
+    const notifyError = () => toast.error("Login Failed.")
 
     const onSubmit = async (data, e) => {
         try {
@@ -83,7 +83,7 @@ const Login = () => {
                             value={values[input.name] ?? ""}
                             onChange={onChange}
                         />
-                        <span>{input.errorMessage ?? ""}</span>
+                        <span>{errors ?? ""}</span>
                     </div>
                 ))}
                 <button className="reg-form" type={"submit"}>Login</button>
