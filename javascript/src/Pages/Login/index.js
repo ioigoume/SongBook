@@ -70,10 +70,9 @@ const Login = () => {
             <form method="post" onSubmit={handleSubmit(onSubmit)}>
                 <h1 className="reg-log">Login</h1>
                 {inputs.map((input) => (
-                    <div className="formInput">
+                    <div key={input.id} className="formInput">
                         <label>{input.label}</label>
                         <input
-                            key={input.name+input.id}
                             id={input.name}
                             {...register(input.name, {
                                 required: input.required,

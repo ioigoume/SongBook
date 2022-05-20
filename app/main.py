@@ -10,11 +10,7 @@ from app.models import *
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:3000",
-    "http://localhost:3004",
-]
-
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
