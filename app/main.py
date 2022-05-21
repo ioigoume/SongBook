@@ -2,11 +2,11 @@ from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 from app.database import get_session
 from app.models import *
-
 
 app = FastAPI()
 
@@ -36,10 +36,10 @@ def create_song(*, session: Session = Depends(get_session), song: SongCreate):
 
 @app.get("/songs/", response_model=List[SongRead])
 def read_songs(
-    *,
-    session: Session = Depends(get_session),
-    offset: int = 0,
-    limit: int = Query(default=100, lte=100),
+        *,
+        session: Session = Depends(get_session),
+        offset: int = 0,
+        limit: int = Query(default=100, lte=100),
 ):
     songs = session.exec(select(Song).offset(offset).limit(limit)).all()
     return songs
@@ -55,7 +55,7 @@ def read_song(*, session: Session = Depends(get_session), song_id: int):
 
 @app.patch("/songs/{song_id}", response_model=SongRead)
 def update_song(
-    *, session: Session = Depends(get_session), song_id: int, song: SongUpdate
+        *, session: Session = Depends(get_session), song_id: int, song: SongUpdate
 ):
     db_song = session.get(Song, song_id)
     if not db_song:
@@ -71,14 +71,12 @@ def update_song(
 
 @app.delete("/songs/{song_id}")
 def delete_song(*, session: Session = Depends(get_session), song_id: int):
-
     song = session.get(Song, song_id)
     if not song:
         raise HTTPException(status_code=404, detail="Song not found")
     session.delete(song)
     session.commit()
     return {"ok": True}
-
 
 
 # User
@@ -93,10 +91,10 @@ def create_user(*, session: Session = Depends(get_session), user: UserCreate):
 
 @app.get("/users/", response_model=List[UserRead])
 def read_users(
-    *,
-    session: Session = Depends(get_session),
-    offset: int = 0,
-    limit: int = Query(default=100, lte=100),
+        *,
+        session: Session = Depends(get_session),
+        offset: int = 0,
+        limit: int = Query(default=100, lte=100),
 ):
     users = session.exec(select(User).offset(offset).limit(limit)).all()
     return users
@@ -112,7 +110,7 @@ def read_user(*, session: Session = Depends(get_session), user_id: int):
 
 @app.patch("/users/{user_id}", response_model=UserUpdate)
 def update_user(
-    *, session: Session = Depends(get_session), user_id: int, user: UserUpdate
+        *, session: Session = Depends(get_session), user_id: int, user: UserUpdate
 ):
     db_user = session.get(User, user_id)
     if not db_user:
@@ -128,7 +126,6 @@ def update_user(
 
 @app.delete("/users/{user_id}")
 def delete_user(*, session: Session = Depends(get_session), user_id: int):
-
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -136,3 +133,16 @@ def delete_user(*, session: Session = Depends(get_session), user_id: int):
     session.commit()
     return {"ok": True}
 
+
+@app.post("/users/login")
+def login_user(
+        user_login: UserLogin,
+        session: Session = Depends(get_session)
+):
+    statement = select(User).where(User.email == user_login.email, User.password == user_login.password)
+    result_set = session.exec(statement)
+    user = result_set.first()
+    if user:
+        return user
+    else:
+        return {}

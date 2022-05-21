@@ -31,6 +31,10 @@ class UserUpdate(SQLModel):
     email: Optional[str] = None
     password: Optional[str] = None
 
+class UserLogin(SQLModel):
+    email: str
+    password: str
+
 # Songs
 class SongBase(SQLModel):
     title: str
