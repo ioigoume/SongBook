@@ -24,7 +24,17 @@ import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import {ErrorMessage} from "@hookform/error-message";
+import {yupResolver} from '@hookform/resolvers/yup';
+import * as yup from "yup";
 
+const schema = yup.object().shape({
+  title: yup
+    .string()
+    .matches(/^[A-Za-z0-9\s]{2,}$/, "Title is invalid"),
+  artist: yup
+    .string()
+    .matches(/^[A-Za-z0-9\s]{2,}$/, "Artist is invalid")
+});
 
 const style = {
   position: 'absolute',
@@ -50,7 +60,10 @@ export default function SongBookTable({song_headers, rows}) {
   const notifyError = () => toast.error("There was an error updating the song");
 
   // FORM
-  const {control, register, handleSubmit, reset, formState: {errors}} = useForm();
+  const {control, register, handleSubmit, reset, formState: {errors}} = useForm({
+    mode: "onBlur",
+    resolver: yupResolver(schema)
+  });
 
   // Update all non-Date fields
   const onChange = (e) => {
@@ -61,7 +74,7 @@ export default function SongBookTable({song_headers, rows}) {
     // Unpack values to variable
     const {title, artist, release_date} = data
     // format my date
-    const formattedDueDate = moment(release_date).utc().format()
+    const formattedDueDate = moment(editRow.release_date).utc().format()
 
     // Make the request and wait for the response
     return await client.patch('/songs/' + editRow.id, {
@@ -80,6 +93,7 @@ export default function SongBookTable({song_headers, rows}) {
       notifySuccess()
       reset()
       e.target.reset()
+      setOpen(false)
     } catch (err) {
       notifyError()
       throw new Error(err)
@@ -89,9 +103,7 @@ export default function SongBookTable({song_headers, rows}) {
   // MODAL
 
   const handleOpen = (row) => {
-    console.log('row raw: ', row)
     setEditRow(JSON.parse(row))
-    console.log('editRow: ', editRow)
     setOpen(true)
   }
 
@@ -125,7 +137,6 @@ export default function SongBookTable({song_headers, rows}) {
               <TableCell align="left">{moment(row.release_date).utc().local().format('L')}</TableCell>
               <TableCell align="center">
                 <Button size="small" songob={JSON.stringify(row)} onClick={(e) => {
-                  console.log("target: ", e.target.getAttribute('songob'))
                   handleOpen(e.target.getAttribute('songob'))
                 }} key={"edit" + row.id.toString()} variant="text" startIcon={<FontAwesomeIcon icon={faEdit}/>}>
                   Edit
@@ -159,12 +170,6 @@ export default function SongBookTable({song_headers, rows}) {
             <Controller
               name={"title"}
               control={control}
-              rules={{
-                pattern: {
-                  value: /^[A-Za-z0-9]{2,}$/,
-                  message: "Title is invalid"
-                }
-              }}
               render={({
                          field: {ref, ...field},
                          fieldState: {invalid, error}
@@ -174,28 +179,23 @@ export default function SongBookTable({song_headers, rows}) {
                     {...field}
                     id="title"
                     label="Title"
-                    autoFocus={true}
+                    autoFocus
                     fullWidth
                     margin="normal"
                     defaultValue={editRow.title || ""}
                     variant="outlined"
                     error={invalid}
                   />
-                  <ErrorMessage errors={errors} name="title" as="p"/>
+                  <ErrorMessage style={{color: "red"}} errors={errors} name="title" as="p"/>
                 </>
               )}
             />
+
 
             {/* Artist */}
             <Controller
               name={"artist"}
               control={control}
-              rules={{
-                pattern: {
-                  value: /^[A-Za-z0-9]{3,}$/,
-                  message: "Artist is invalid"
-                }
-              }}
               render={({
                          field: {ref, ...field},
                          fieldState: {invalid, error}
@@ -211,7 +211,7 @@ export default function SongBookTable({song_headers, rows}) {
                     variant="outlined"
                     error={invalid}
                   />
-                  <ErrorMessage errors={errors} name="artist" as="p"/>
+                  <ErrorMessage style={{color: "red"}} errors={errors} name="artist" as="p"/>
                 </>
               )}
             />
@@ -221,10 +221,13 @@ export default function SongBookTable({song_headers, rows}) {
               <DatePicker
                 label="Release Date"
                 value={editRow.release_date}
-                onChange={(newValue) => {
-                  setEditRow('release_date', newValue);
+                onChange={(date) => {
+                  console.log("date: ", date)
+                  setEditRow({...editRow, ['release_date']: date});
                 }}
-                renderInput={(params) => <TextField {...params} sx={{width: '100%', marginTop: 2}}/>}
+                renderInput={(params) =>
+                  <TextField {...params} sx={{width: '100%', marginTop: 2}}/>
+                }
               />
             </LocalizationProvider>
 
