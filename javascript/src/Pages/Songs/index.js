@@ -2,7 +2,7 @@ import {useState, useContext} from "react";
 import "../../app.css";
 import {Link, useNavigate} from "react-router-dom";
 import {useQuery} from "react-query";
-import SongBookTable from "../../components/Table";
+import SongBookTable from "../../components/Common/Table";
 import {allUserSongs} from "../../utils/queryKeys";
 import {getUserSongs} from "../../utils/queries";
 import {UserContext} from "../../Context/UserContext";
@@ -12,12 +12,16 @@ const SongList = () => {
     const navigate = useNavigate();
 
     // Check if my user exists
-    if (Object.keys(currentUser).length === 0) {
-      navigate("/login");
-    }
+    // if (Object.keys(currentUser).length === 0) {
+    //   navigate("/login");
+    // }
     // Fetch the songs
-    const query = useQuery(
-      [allUserSongs, {userId: currentUser.id}],
+    // const query = useQuery(
+    //   [allUserSongs, {userId: currentUser.id}],
+    //   getUserSongs
+    // )
+  const query = useQuery(
+      [allUserSongs, {userId: 1}],
       getUserSongs
     )
 
