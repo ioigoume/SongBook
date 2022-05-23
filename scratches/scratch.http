@@ -1,0 +1,20 @@
+### GET USER
+GET http://localhost:8004/users/1
+Cache-Control: no-cache
+Accept: application/json
+
+### GET USER SONGS
+GET http://localhost:8004/users/1/songs
+Cache-Control: no-cache
+Accept: application/json
+
+### POST USER LOGIN
+POST http://localhost:8004/users/login
+Cache-Control: no-cache
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "john.doe@mailinator.com",
+  "password": "1234"
+}

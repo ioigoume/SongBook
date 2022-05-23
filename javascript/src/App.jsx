@@ -17,6 +17,7 @@ function App() {
                     <Route path="/register" element={<Register/>}/>
                     <Route path="/" element={<Login/>}/>
                     <Route path="/songs" element={<Songs/>}/>
+                    <Route path="/users/:userId/songs" element={<Songs/>}/>
                     <Route path="*" element={<ErrorPage/>}/>
                 </Routes>
             </QueryClientProvider>

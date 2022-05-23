@@ -14,6 +14,12 @@ export const getUser = async({queryKey}) => {
     const response = await apiClient.get('/users/' + params.userId)
     return response.data
 }
+// GET User Songs
+export const getUserSongs = async({queryKey}) => {
+    const [_, params] = queryKey
+    const response = await apiClient.get('/users/' + params.userId + '/songs')
+    return response.data
+}
 // Delete User
 export const delUser = async({queryKey}) => {
     const [_, params] = queryKey

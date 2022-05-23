@@ -8,8 +8,8 @@ const client = axios.create({
   },
   transformResponse: [function (data) {
     try {
-      const responseData = JSON.parse(data)
-      return responseData.errors ? responseData.errors : responseData.data
+      // todo: Check for errors returned by the server
+      return  JSON.parse(data)
     } catch (err) {
       return err
     }

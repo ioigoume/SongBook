@@ -24,7 +24,9 @@ def pong():
     return {"ping": "pong!"}
 
 
-@app.post("/songs/", response_model=SongRead)
+@app.post("/songs/",
+          response_model=SongRead,
+          tags=["songs"])
 def create_song(*, session: Session = Depends(get_session), song: SongCreate):
     db_song = Song.from_orm(song)
     session.add(db_song)
@@ -33,7 +35,9 @@ def create_song(*, session: Session = Depends(get_session), song: SongCreate):
     return db_song
 
 
-@app.get("/songs/", response_model=List[SongRead])
+@app.get("/songs/",
+         response_model=List[SongRead],
+         tags=["songs"])
 def read_songs(
         *,
         session: Session = Depends(get_session),
@@ -44,7 +48,9 @@ def read_songs(
     return songs
 
 
-@app.get("/songs/{song_id}", response_model=SongRead)
+@app.get("/songs/{song_id}",
+         response_model=SongRead,
+         tags=["songs"])
 def read_song(*, session: Session = Depends(get_session), song_id: int):
     song = session.get(Song, song_id)
     if not song:
@@ -52,7 +58,9 @@ def read_song(*, session: Session = Depends(get_session), song_id: int):
     return song
 
 
-@app.patch("/songs/{song_id}", response_model=SongRead)
+@app.patch("/songs/{song_id}",
+           response_model=SongRead,
+           tags=["songs"])
 def update_song(
         *, session: Session = Depends(get_session), song_id: int, song: SongUpdate
 ):
@@ -68,7 +76,8 @@ def update_song(
     return db_song
 
 
-@app.delete("/songs/{song_id}")
+@app.delete("/songs/{song_id}",
+            tags=["songs"])
 def delete_song(*, session: Session = Depends(get_session), song_id: int):
     song = session.get(Song, song_id)
     if not song:
@@ -79,7 +88,9 @@ def delete_song(*, session: Session = Depends(get_session), song_id: int):
 
 
 # User
-@app.post("/users/", response_model=UserCreate)
+@app.post("/users/",
+          response_model=UserCreate,
+          tags=["users"])
 def create_user(*, session: Session = Depends(get_session), user: UserCreate):
     db_user = User.from_orm(user)
     session.add(db_user)
@@ -88,7 +99,9 @@ def create_user(*, session: Session = Depends(get_session), user: UserCreate):
     return db_user
 
 
-@app.get("/users/", response_model=List[UserRead])
+@app.get("/users/",
+         response_model=List[UserRead],
+         tags=["users"])
 def read_users(
         *,
         session: Session = Depends(get_session),
@@ -99,15 +112,36 @@ def read_users(
     return users
 
 
-@app.get("/users/{user_id}", response_model=UserRead)
-def read_user(*, session: Session = Depends(get_session), user_id: int):
+@app.get("/users/{user_id}/songs",
+         response_model=List[UserSongsRead],
+         tags=["songs", "collections"])
+def read_user_songs(
+        *,
+        session: Session = Depends(get_session),
+        offset: int = 0,
+        limit: int = Query(default=100, lte=100),
+        user_id: int
+):
+    songs = session.exec(select(Song).where(Song.user_id == user_id).offset(offset).limit(limit)).all()
+    return songs
+
+
+@app.get("/users/{user_id}",
+         response_model=UserRead,
+         tags=["users"])
+def read_user(
+        *,
+        session: Session = Depends(get_session),
+        user_id: int):
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-@app.patch("/users/{user_id}", response_model=UserUpdate)
+@app.patch("/users/{user_id}",
+           response_model=UserUpdate,
+           tags=["users"])
 def update_user(
         *, session: Session = Depends(get_session), user_id: int, user: UserUpdate
 ):
@@ -123,7 +157,8 @@ def update_user(
     return db_user
 
 
-@app.delete("/users/{user_id}")
+@app.delete("/users/{user_id}",
+            tags=["users"])
 def delete_user(*, session: Session = Depends(get_session), user_id: int):
     user = session.get(User, user_id)
     if not user:
@@ -133,7 +168,9 @@ def delete_user(*, session: Session = Depends(get_session), user_id: int):
     return {"ok": True}
 
 
-@app.post("/users/login")
+@app.post("/users/login",
+          response_model=UserLoginResponse,
+          tags=["users", "authentication"])
 def login_user(
         user_login: UserLogin,
         session: Session = Depends(get_session)

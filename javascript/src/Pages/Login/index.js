@@ -40,16 +40,12 @@ const Login = () => {
   const onSubmit = async (data, e) => {
     try {
       const response = await sendData(data)
+      setCurrentUser(response.data)
       reset()
-      setCurrentUser(response.config.data)
-      console.dir(response.config.data)
-      navigate("/songs");
-      // Check data and redirect to songs view
+      navigate('/users/' + response.data.id + '/songs')
     } catch (err) {
       notifyError()
-      console.log(err.message)
       reset()
-      // throw new Error(err)
     }
   }
 

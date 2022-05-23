@@ -3,6 +3,7 @@ from sqlmodel import Field, Relationship, Session, SQLModel
 from sqlalchemy import UniqueConstraint
 from datetime import datetime
 
+
 # User
 class UserBase(SQLModel):
     first_name: str
@@ -25,15 +26,24 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int
 
+
 class UserUpdate(SQLModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: Optional[str] = None
     password: Optional[str] = None
 
+
 class UserLogin(SQLModel):
     email: str
     password: str
+
+class UserLoginResponse(SQLModel):
+    id: int
+    email: str
+    first_name: str
+    last_name: str
+
 
 # Songs
 class SongBase(SQLModel):
@@ -51,6 +61,10 @@ class Song(SongBase, table=True):
 
 
 class SongRead(SongBase):
+    id: int
+
+
+class UserSongsRead(SongBase):
     id: int
 
 
@@ -91,5 +105,3 @@ class CommentCreate(CommentBase):
 
 class CommentUpdate(SQLModel):
     comment: Optional[str] = None
-
-
