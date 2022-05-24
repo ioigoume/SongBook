@@ -4,7 +4,8 @@ const client = axios.create({
   baseURL: "http://localhost:8004/",
   headers: {
     "Access-Control-Allow-Origin": "*",
-    "Content-type": "application/json"
+    "Content-type": "application/json",
+    // 'Authorization': `token ${access_token}`
   },
   transformResponse: [function (data) {
     try {

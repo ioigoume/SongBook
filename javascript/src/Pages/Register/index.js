@@ -51,7 +51,6 @@ const Register = () => {
       // Check data and redirect to songs view
     } catch (err) {
       notifyError()
-      console.log(err.message)
       reset()
       // throw new Error(err)
     }

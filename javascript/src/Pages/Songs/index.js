@@ -25,10 +25,8 @@ const SongList = () => {
       getUserSongs
     )
 
-    console.log("query", query)
-
   const song_headers = [
-    "Title", "Artist", "Release Date"
+    "ID", "Title", "Artist", "Release Date"
   ]
 
     // ELEMENT

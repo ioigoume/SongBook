@@ -25,7 +25,10 @@ import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import {ErrorMessage} from "@hookform/error-message";
 import {yupResolver} from '@hookform/resolvers/yup';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
 import * as yup from "yup";
+import AddIcon from '@mui/icons-material/Add';
 
 const schema = yup.object().shape({
   title: yup
@@ -53,11 +56,12 @@ export default function SongBookTable({song_headers, rows}) {
   const {currentUser, setCurrentUser} = useContext(UserContext)
   const [open, setOpen] = useState(false)
   const [editRow, setEditRow] = useState('')
+  const [postAction, setPostAction] = useState('patch')
   const queryClient = useQueryClient();
 
 
-  const notifySuccess = () => toast.success("Song updated successfully");
-  const notifyError = () => toast.error("There was an error updating the song");
+  const notifySuccess = () => toast.success("Song " + actionMapper[postAction] + " succeeded.");
+  const notifyError = () => toast.error("Song " + actionMapper[postAction] + " failed.");
 
   // FORM
   const {control, register, handleSubmit, reset, formState: {errors}} = useForm({
@@ -70,21 +74,35 @@ export default function SongBookTable({song_headers, rows}) {
     setEditRow({...editRow, [e.target.name]: e.target.value});
   };
 
-  async function patchForm(data) {
+  async function actionForm(data) {
     // Unpack values to variable
     const {title, artist, release_date} = data
     // format my date
     const formattedDueDate = moment(editRow.release_date).utc().format()
+    console.log("Post Action:", postAction)
 
-    // Make the request and wait for the response
-    return await client.patch('/songs/' + editRow.id, {
-      title: title,
-      artist: artist,
-      release_date: formattedDueDate,
-    })
+    if (postAction === 'patch') {
+      // Make the request and wait for the response
+      return await client.patch('/songs/' + editRow.id, {
+        title: title,
+        artist: artist,
+        release_date: formattedDueDate,
+      })
+    } else if (postAction === 'post') {
+      // Make the request and wait for the response
+      return await client.post('/songs', {
+        title: title,
+        artist: artist,
+        release_date: formattedDueDate,
+        user_id: 1
+      })
+    } else if (postAction === 'delete') {
+      // Make the request and wait for the response
+      return await client.delete('/songs/' + editRow.id)
+    }
   }
 
-  const {isLoading, mutateAsync: sendData} = useMutation(patchForm);
+  const {isLoading, mutateAsync: sendData} = useMutation(actionForm);
 
   const onSubmit = async (data, e) => {
     try {
@@ -101,9 +119,13 @@ export default function SongBookTable({song_headers, rows}) {
   }
 
   // MODAL
+  const actionMapper = {
+    "patch": "Edit",
+    "delete": "Delete",
+    "post": "Add"
+  }
 
   const handleOpen = (row) => {
-    setEditRow(JSON.parse(row))
     setOpen(true)
   }
 
@@ -114,127 +136,178 @@ export default function SongBookTable({song_headers, rows}) {
 
 
   return (
-    <TableContainer sx={{width: "auto"}} component={Paper}>
-      <Table sx={{minWidth: 650}} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            {
-              song_headers.map((song_head) => (
-                <TableCell key={song_head} align="left">{song_head}</TableCell>
-              ))
-            }
-            < TableCell align="center">Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow
-              key={row.title + row.id.toString()}
-              sx={{'&:last-child td, &:last-child th': {border: 0}}}
-            >
-              <TableCell align="left">{row.title}</TableCell>
-              <TableCell align="left">{row.artist}</TableCell>
-              <TableCell align="left">{moment(row.release_date).utc().local().format('L')}</TableCell>
-              <TableCell align="center">
-                <Button size="small" songob={JSON.stringify(row)} onClick={(e) => {
-                  handleOpen(e.target.getAttribute('songob'))
-                }} key={"edit" + row.id.toString()} variant="text" startIcon={<FontAwesomeIcon icon={faEdit}/>}>
-                  Edit
-                </Button>
-                <Button size="small" color="error" songid={row.id} onClick={(e) => {
-                  alert("Delete:" + e.target.getAttribute('songid'))
-                }} key={"delete" + row.id.toString()} variant="text" startIcon={<FontAwesomeIcon icon={faTrash}/>}>
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          {/* TITLE */}
-          <Typography mb={3} id="modal-modal-title" variant="h6" component="h2">
-            Edit Song #{editRow.id}
-          </Typography>
+    <Grid
+      container
+      direction="row"
+      justifyContent="center"
+      spacing={2} columns={12}
+      alignItems="center">
+      <Grid item xs={8}>
+        <Button
+          color="primary"
+          size="small"
+          startIcon={<AddIcon/>}
+          component="button"
+          variant="contained"
+          onClick={() => {
+            setPostAction('post')
+            setOpen(true)
+            setEditRow({})
+          }}
+        >
+          Add New Song
+        </Button>
+      </Grid>
 
-          {/* FORM */}
-          <form method="patch" onSubmit={handleSubmit(onSubmit)}>
-
-            {/* Title */}
-            <Controller
-              name={"title"}
-              control={control}
-              render={({
-                         field: {ref, ...field},
-                         fieldState: {invalid, error}
-                       }) => (
-                <>
-                  <TextField
-                    {...field}
-                    id="title"
-                    label="Title"
-                    autoFocus
-                    fullWidth
-                    margin="normal"
-                    defaultValue={editRow.title || ""}
-                    variant="outlined"
-                    error={invalid}
-                  />
-                  <ErrorMessage style={{color: "red"}} errors={errors} name="title" as="p"/>
-                </>
-              )}
-            />
-
-
-            {/* Artist */}
-            <Controller
-              name={"artist"}
-              control={control}
-              render={({
-                         field: {ref, ...field},
-                         fieldState: {invalid, error}
-                       }) => (
-                <>
-                  <TextField
-                    {...field}
-                    fullWidth
-                    margin="normal"
-                    id="artist"
-                    label="Artist"
-                    defaultValue={editRow.artist || ""}
-                    variant="outlined"
-                    error={invalid}
-                  />
-                  <ErrorMessage style={{color: "red"}} errors={errors} name="artist" as="p"/>
-                </>
-              )}
-            />
-
-            {/* DATE */}
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Release Date"
-                value={editRow.release_date}
-                onChange={(date) => {
-                  console.log("date: ", date)
-                  setEditRow({...editRow, ['release_date']: date});
-                }}
-                renderInput={(params) =>
-                  <TextField {...params} sx={{width: '100%', marginTop: 2}}/>
+      <Grid item xs={8}>
+        <TableContainer sx={{width: "auto"}} component={Paper}>
+          <Table sx={{minWidth: 650}} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                {
+                  song_headers.map((song_head) => (
+                    <TableCell key={song_head} align="left">{song_head}</TableCell>
+                  ))
                 }
-              />
-            </LocalizationProvider>
+                < TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow
+                  key={row.title + row.id.toString()}
+                  sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                >
+                  <TableCell align="left">{row.id}</TableCell>
+                  <TableCell align="left">{row.title}</TableCell>
+                  <TableCell align="left">{row.artist}</TableCell>
+                  <TableCell align="left">{moment(row.release_date).utc().local().format('L')}</TableCell>
+                  <TableCell align="center">
+                    <Button size="small" songob={JSON.stringify(row)} onClick={(e) => {
+                      setPostAction('patch')
+                      setOpen(true)
+                      setEditRow(JSON.parse(e.target.getAttribute('songob')))
+                    }} key={"edit" + row.id.toString()} variant="text" startIcon={<FontAwesomeIcon icon={faEdit}/>}>
+                      Edit
+                    </Button>
+                    <Button size="small" color="error" songob={JSON.stringify(row)} onClick={(e) => {
+                      setPostAction('delete')
+                      setEditRow(JSON.parse(e.target.getAttribute('songob')))
+                      setOpen(true)
+                    }} key={"delete" + row.id.toString()} variant="text"
+                            startIcon={<FontAwesomeIcon icon={faTrash}/>}>
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={style}>
+              {/* TITLE */}
+              <Typography mb={3} id="modal-modal-title" variant="h6" component="h2">
+                {actionMapper[postAction]} Song {["patch", "delete"].includes(postAction) ? "#" + editRow.id : ""}
+              </Typography>
 
-            <button className="reg-form" type="submit">Update</button>
-          </form>
-        </Box>
-      </Modal>
-    </TableContainer>
-  );
+              {/* FORM */}
+              <form method="patch" onSubmit={handleSubmit(onSubmit)}>
+
+                {/* Title */}
+                {
+                  postAction === "delete" ? <></>
+                    :
+                    <Controller
+                      name={"title"}
+                      control={control}
+                      render={({
+                                 field: {ref, ...field},
+                                 fieldState: {invalid, error}
+                               }) => (
+                        <>
+                          <TextField
+                            {...field}
+                            id="title"
+                            label="Title"
+                            autoFocus
+                            fullWidth
+                            margin="normal"
+                            defaultValue={editRow.title || ""}
+                            variant="outlined"
+                            error={invalid}
+                          />
+                          <ErrorMessage style={{color: "red"}} errors={errors} name="title" as="p"/>
+                        </>
+                      )}
+                    />
+                }
+
+                {/* Artist */}
+                {
+                  postAction === "delete" ? <></>
+                    :
+                    <Controller
+                      name={"artist"}
+                      control={control}
+                      render={({
+                                 field: {ref, ...field},
+                                 fieldState: {invalid, error}
+                               }) => (
+                        <>
+                          <TextField
+                            {...field}
+                            fullWidth
+                            margin="normal"
+                            id="artist"
+                            label="Artist"
+                            defaultValue={editRow.artist || ""}
+                            variant="outlined"
+                            error={invalid}
+                          />
+                          <ErrorMessage style={{color: "red"}} errors={errors} name="artist" as="p"/>
+                        </>
+                      )}
+                    />
+                }
+
+
+                {/* DATE */}
+                {
+                  postAction === "delete" ? <></>
+                    :
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DatePicker
+                        label="Release Date"
+                        value={editRow.release_date}
+                        onChange={(date) => {
+                          setEditRow({...editRow, ['release_date']: date});
+                        }}
+                        renderInput={(params) =>
+                          <TextField {...params} sx={{width: '100%', marginTop: 2}}/>
+                        }
+                      />
+                    </LocalizationProvider>
+                }
+
+                {
+                  postAction === "delete" ?
+                    <>
+                      <p>Are you sure you want to delete the song <b>{editRow.title}</b></p>
+                    </>
+                    : <></>
+                }
+
+                <button className="reg-form" type="submit">{actionMapper[postAction]}</button>
+              </form>
+            </Box>
+          </Modal>
+        </TableContainer>
+      </Grid>
+    </Grid>
+  )
 }
