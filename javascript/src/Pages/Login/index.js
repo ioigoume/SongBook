@@ -12,6 +12,18 @@ const Login = () => {
   const navigate = useNavigate();
   const {currentUser, setCurrentUser} = useContext(UserContext);
 
+  const stored_user = JSON.parse(localStorage.getItem('logged_in_user'))
+
+  // Retrieve the stored user from the local storage
+  if (Object.keys(stored_user).length !== 0) {
+    setCurrentUser(stored_user)
+  }
+
+  // Check if my user exists
+  if (Object.keys(currentUser).length !== 0) {
+    navigate("/users/" + currentUser.id + "/songs");
+  }
+
   const [values, setValues] = useState({
     email: "",
     password: "",
@@ -41,6 +53,7 @@ const Login = () => {
     try {
       const response = await sendData(data)
       setCurrentUser(response.data)
+      localStorage.setItem('logged_in_user', JSON.stringify(response.data));
       reset()
       navigate('/users/' + response.data.id + '/songs')
     } catch (err) {

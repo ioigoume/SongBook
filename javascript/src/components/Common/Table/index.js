@@ -94,7 +94,7 @@ export default function SongBookTable({song_headers, rows}) {
         title: title,
         artist: artist,
         release_date: formattedDueDate,
-        user_id: 1
+        user_id: currentUser.id
       })
     } else if (postAction === 'delete') {
       // Make the request and wait for the response
@@ -107,7 +107,7 @@ export default function SongBookTable({song_headers, rows}) {
   const onSubmit = async (data, e) => {
     try {
       await sendData(data)
-      await queryClient.refetchQueries([allUserSongs, {userId: 1}])
+      await queryClient.refetchQueries([allUserSongs, {userId: currentUser.id}])
       notifySuccess()
       reset()
       e.target.reset()

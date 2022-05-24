@@ -10,24 +10,26 @@ import {UserContext} from "../../Context/UserContext";
 const SongList = () => {
     const {currentUser, setCurrentUser} = useContext(UserContext);
     const navigate = useNavigate();
+    const stored_user = JSON.parse(localStorage.getItem('logged_in_user'))
+
+    // Retrieve the stored user from the local storage
+    if (Object.keys(stored_user).length !== 0) {
+      setCurrentUser(stored_user)
+    }
 
     // Check if my user exists
-    // if (Object.keys(currentUser).length === 0) {
-    //   navigate("/login");
-    // }
+    if (Object.keys(currentUser).length === 0) {
+      navigate("/login");
+    }
     // Fetch the songs
-    // const query = useQuery(
-    //   [allUserSongs, {userId: currentUser.id}],
-    //   getUserSongs
-    // )
-  const query = useQuery(
-      [allUserSongs, {userId: 1}],
+    const query = useQuery(
+      [allUserSongs, {userId: currentUser.id}],
       getUserSongs
     )
 
-  const song_headers = [
-    "ID", "Title", "Artist", "Release Date"
-  ]
+    const song_headers = [
+      "ID", "Title", "Artist", "Release Date"
+    ]
 
     // ELEMENT
     return (
