@@ -25,10 +25,10 @@ import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import {ErrorMessage} from "@hookform/error-message";
 import {yupResolver} from '@hookform/resolvers/yup';
-import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import * as yup from "yup";
 import AddIcon from '@mui/icons-material/Add';
+import {useNavigate} from "react-router-dom";
 
 const schema = yup.object().shape({
   title: yup
@@ -58,7 +58,7 @@ export default function SongBookTable({song_headers, rows}) {
   const [editRow, setEditRow] = useState('')
   const [postAction, setPostAction] = useState('patch')
   const queryClient = useQueryClient();
-
+  const navigate = useNavigate();
 
   const notifySuccess = () => toast.success("Song " + actionMapper[postAction] + " succeeded.");
   const notifyError = () => toast.error("Song " + actionMapper[postAction] + " failed.");
@@ -73,6 +73,7 @@ export default function SongBookTable({song_headers, rows}) {
   const onChange = (e) => {
     setEditRow({...editRow, [e.target.name]: e.target.value});
   };
+
 
   async function actionForm(data) {
     // Unpack values to variable
@@ -132,6 +133,12 @@ export default function SongBookTable({song_headers, rows}) {
   const handleClose = () => {
     setOpen(false)
     setEditRow({})
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("logged_in_user");
+    setCurrentUser({})
+    navigate("/login");
   }
 
 
@@ -307,6 +314,22 @@ export default function SongBookTable({song_headers, rows}) {
             </Box>
           </Modal>
         </TableContainer>
+      </Grid>
+
+      <Grid item xs={8}>
+        <Button
+          color="secondary"
+          size="small"
+          component="button"
+          variant="text"
+          onClick={() => {
+            handleLogout()
+            setOpen(false)
+            setEditRow({})
+          }}
+        >
+          Logout
+        </Button>
       </Grid>
     </Grid>
   )
