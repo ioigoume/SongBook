@@ -48,18 +48,6 @@ services:
       - ./javascript:/app
     tty: true
 
-  pgadmin:
-    depends_on:
-      - db
-    container_name: pg.admin.container
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=ioigoume@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-    ports:
-      - "127.0.0.1:5050:80"
-
 volumes:
   pgdata:
 
